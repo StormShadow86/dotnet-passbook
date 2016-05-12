@@ -83,15 +83,17 @@ namespace PassbookGeneratorConsole
         {
             X509Store certAuthStore = null;
             X509Certificate2 appleCert = null;
+            X509Certificate2Collection coll = null;
 
             try
             {
                 certAuthStore = new X509Store(StoreName.CertificateAuthority, StoreLocation.CurrentUser);
                 certAuthStore.Open(OpenFlags.ReadOnly);
 
-                appleCert =
-                    certAuthStore.Certificates.Find(X509FindType.FindByThumbprint,
-                        "ff6797793a3cd798dc5b2abef56f73edc9f83a64", false)[0];
+                coll = certAuthStore.Certificates.Find(X509FindType.FindByThumbprint,
+                        "ff6797793a3cd798dc5b2abef56f73edc9f83a64", false);
+                if (coll.Count > 0)
+                    appleCert = coll[0];
 
                 _logger.Info(@"Apple Thumbprint: {0}", appleCert.Thumbprint);
             }
@@ -114,19 +116,28 @@ namespace PassbookGeneratorConsole
             return GetAppleCertificate().GetRawCertData();
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
+        /// <remarks>
+        /// SubjectKeyIdentifier DESKTOP-STORM: 901b19ecfe0082d4188f6f0398ec763ad8dacd49
+        /// </remarks>
         private static X509Certificate2 GetPassCertificate()
         {
             X509Store personalStore = null;
             X509Certificate2 passCert = null;
+            X509Certificate2Collection coll = null;
 
             try
             {
                 personalStore = new X509Store(StoreName.My, StoreLocation.CurrentUser);
                 personalStore.Open(OpenFlags.ReadOnly);
 
-                passCert =
-                    personalStore.Certificates.Find(X509FindType.FindBySubjectKeyIdentifier,
-                        "901b19ecfe0082d4188f6f0398ec763ad8dacd49", false)[0];
+                coll = personalStore.Certificates.Find(X509FindType.FindBySubjectKeyIdentifier,
+                        "505416ee87479bfc25b22e0f7e9aa633753e51b5", false);
+                if (coll.Count > 0)
+                    passCert =coll[0];
 
                 _logger.Info(@"Pass thumbprint: {0}", passCert.Thumbprint);
             }
@@ -157,8 +168,11 @@ namespace PassbookGeneratorConsole
                 PassGenerator generator = new PassGenerator();
                 PassGeneratorRequest request = new PassGeneratorRequest();
 
-                generator.AppleCertificate = GetAppleCertificate();
-                generator.PassCertificate = GetPassCertificate();
+                //generator.AppleCertificate = GetAppleCertificate();
+                //generator.PassCertificate = GetPassCertificate();
+
+                request.AppleWWDRCACertificate = GetAppleCertificate();
+                request.Certificate = GetPassCertificate();
 
                 request.PassTypeIdentifier = "pass.datorsis.com";
                 request.TeamIdentifier = "SQY9S578XQ";
@@ -173,15 +187,25 @@ namespace PassbookGeneratorConsole
 
                 request.Style = PassStyle.EventTicket;
 
-                request.AddPrimaryField(new StandardField("eventName", "Event Name", "Au Sommet Place Ville-Marie Observatoire"));
-                request.AddPrimaryField(new StandardField("customerName", "Customer Name", "Sven Conard"));
+                request.AddPrimaryField(new StandardField("eventName", "event-Name", "Au Sommet Place Ville-Marie Observatoire"));
+                request.AddPrimaryField(new StandardField("customerName", "customer-Name", "Sven Conard"));
 
-                request.AddSecondaryField(new DateField("eventDate", "Event Date", FieldDateTimeStyle.PKDateStyleShort, FieldDateTimeStyle.PKDateStyleNone, DateTime.UtcNow.Date));
-                request.AddSecondaryField(new DateField("eventTime", "Event Time", FieldDateTimeStyle.PKDateStyleNone, FieldDateTimeStyle.PKDateStyleShort, DateTime.UtcNow));
+                request.AddSecondaryField(new DateField("eventDate", "event-Date", FieldDateTimeStyle.PKDateStyleShort, FieldDateTimeStyle.PKDateStyleNone, DateTime.UtcNow.Date));
+                request.AddSecondaryField(new DateField("eventTime", "event-Time", FieldDateTimeStyle.PKDateStyleNone, FieldDateTimeStyle.PKDateStyleShort, DateTime.UtcNow));
 
                 request.AddBarCode("BE411604", BarcodeType.PKBarcodeFormatQR, "Windows-1252", "BE411604");
 
-                request.Images.Add(PassbookImage.Strip, File.ReadAllBytes(@"D:\Git Repositories\dotnet-passbook\PassbookGeneratorConsole\logo.png"));
+                request.Images.Add(PassbookImage.Icon, File.ReadAllBytes(@"E:\Programmation\dotnet-passbook-sis\PassbookGeneratorConsole\icon.png"));
+                request.Images.Add(PassbookImage.IconRetina, File.ReadAllBytes(@"E:\Programmation\dotnet-passbook-sis\PassbookGeneratorConsole\icon@2x.png"));                
+
+                request.AddLocalization("fr", "event-Name", "Événement");
+                request.AddLocalization("fr", "customer-Name", "Nom du client");
+                request.AddLocalization("fr", "event-Date", "Date de l'évéenement");
+                request.AddLocalization("fr", "event-Time", "Heure de l'événement");
+                request.AddLocalization("en", "event-Name", "Event Name");
+                request.AddLocalization("en", "customer-Name", "Customer Name");
+                request.AddLocalization("en", "event-Date", "Event Date");
+                request.AddLocalization("en", "event-Time", "Event Time");
 
                 generatedPass = generator.Generate(request);
             }
@@ -211,8 +235,9 @@ namespace PassbookGeneratorConsole
 
                 emailSender.Credentials = new NetworkCredential("webadmin@datorsis.com", "202stv2684");
 
-                using (var msg = new MailMessage("webadmin@datorsis.com", "stormshadow666@gmail.com", "Event Pass Test", ""))
+                using (var msg = new MailMessage("webadmin@datorsis.com", "stormshadow666@gmail.com", "Test Passbook", ""))
                 {
+                    //msg.Bcc.Add("stormshadow666@gmail.com");
                     msg.Attachments.Add(new Attachment(passPath, "application/vnd.apple.pkpass"));
                     emailSender.Send(msg);
                 }

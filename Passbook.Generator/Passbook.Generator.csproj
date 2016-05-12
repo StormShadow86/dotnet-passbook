@@ -71,7 +71,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Exceptions\ManifestSigningException.cs" />
+    <Compile Include="Exceptions\MissingStandardKeyException.cs" />
     <Compile Include="Exceptions\RequiredFieldValueMissingException.cs" />
+    <Compile Include="Exceptions\RequiredIconImageMissingException.cs" />
     <Compile Include="Fields\BarCode.cs" />
     <Compile Include="Fields\BarcodeType.cs" />
     <Compile Include="Fields\DateField.cs" />

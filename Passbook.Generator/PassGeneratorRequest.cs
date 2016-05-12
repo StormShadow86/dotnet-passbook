@@ -8,6 +8,7 @@ using System.Drawing;
 using System.Diagnostics;
 using Passbook.Generator.Configuration;
 using System.IO;
+using Passbook.Generator.Exceptions;
 
 namespace Passbook.Generator
 {
@@ -124,7 +125,7 @@ namespace Passbook.Generator
 
 			String path = TemplateModel.MapPath(section.AppleWWDRCACertificate);
 			if (File.Exists(path))
-				this.AppleWWDRCACertificate = File.ReadAllBytes(path);
+				this.AppleWWDRCACertificateByteArray = File.ReadAllBytes(path);
 
 			TemplateElement templateConfig = section
 				.Templates
@@ -145,9 +146,9 @@ namespace Passbook.Generator
 
 			path = TemplateModel.MapPath(templateConfig.Certificate);
 			if (File.Exists(path))
-				this.Certificate = File.ReadAllBytes(path);
+				this.CertificateByteArray = File.ReadAllBytes(path);
 
-            if (String.IsNullOrEmpty(this.CertThumbprint) && this.Certificate == null)
+            if (String.IsNullOrEmpty(this.CertThumbprint) && this.CertificateByteArray == null)
                 throw new System.Configuration.ConfigurationErrorsException("Either Certificate or CertificateThumbprint is not configured correctly.");
 
 			// Standard Keys
@@ -377,13 +378,23 @@ namespace Passbook.Generator
 		/// <summary>
 		/// A byte array containing the X509 certificate
 		/// </summary>
-		public byte[] Certificate { get; set; }
+		public byte[] CertificateByteArray { get; set; }
 
-		/// <summary>
-		/// A byte array containing the Apple WWDRCA X509 certificate
-		/// </summary>
-		public byte[] AppleWWDRCACertificate { get; set; }
+        /// <summary>
+        /// The X509 certificate for the pass
+        /// </summary>
+        public X509Certificate2 Certificate { get; set; }
 
+        /// <summary>
+        /// A byte array containing the Apple WWDRCA X509 certificate
+        /// </summary>
+        public byte[] AppleWWDRCACertificateByteArray { get; set; }
+
+        /// <summary>
+        /// The Apple WWDRCA (Worldwide Developer Relations Certificate Authority) X509 certificate
+        /// </summary>
+        public X509Certificate2 AppleWWDRCACertificate { get; set; }
+        
 		/// <summary>
 		/// The private key password for the certificate.
 		/// </summary>
@@ -393,6 +404,12 @@ namespace Passbook.Generator
 		/// Certificate Thumbprint value
 		/// </summary>
 		public string CertThumbprint { get; set; }
+
+        /// <summary>
+        /// Certificate Subject Key Identifier value
+        /// </summary>
+        public string CertSubjectKeyIdentifier { get; set; }
+
 		/// <summary>
 		/// Certificate Store Location
 		/// </summary>
@@ -681,26 +698,29 @@ namespace Passbook.Generator
 
         private void WriteBarcodes(JsonWriter writer)
         {
-            writer.WritePropertyName("barcodes");
-            writer.WriteStartArray();
-
-            foreach(var code in Barcodes)
+            if (Barcodes.Count > 0)
             {
-                writer.WriteStartObject();
-                writer.WritePropertyName("message");
-                writer.WriteValue(code.Message);
-                writer.WritePropertyName("format");
-                writer.WriteValue(code.Type.ToString());                
-                writer.WritePropertyName("messageEncoding");
-                writer.WriteValue(code.Encoding);
+                writer.WritePropertyName("barcodes");
+                writer.WriteStartArray();
 
-                if (!String.IsNullOrEmpty(code.AlternateText))
+                foreach (var code in Barcodes)
                 {
-                    writer.WritePropertyName("altText");
-                    writer.WriteValue(code.AlternateText);
-                }
+                    writer.WriteStartObject();
+                    writer.WritePropertyName("message");
+                    writer.WriteValue(code.Message);
+                    writer.WritePropertyName("format");
+                    writer.WriteValue(code.Type.ToString());
+                    writer.WritePropertyName("messageEncoding");
+                    writer.WriteValue(code.Encoding);
 
-                writer.WriteEndObject();
+                    if (!String.IsNullOrEmpty(code.AlternateText))
+                    {
+                        writer.WritePropertyName("altText");
+                        writer.WriteValue(code.AlternateText);
+                    }
+
+                    writer.WriteEndObject();
+                }
             }
         }
 
@@ -826,8 +846,42 @@ namespace Passbook.Generator
 
 			writer.WriteEndArray();
 		}
-		#endregion
+        #endregion        
 
-		public bool IsValid { get { return true; } }
+        /// <summary>
+        /// Validate the pass request by checking the required fields for opening pkpass in iOS
+        /// </summary>
+        public bool IsValid
+        {
+            get
+            {
+                if (!Enum.IsDefined(typeof(PassStyle), Style))
+                    throw new MissingStandardKeyException("Style");
+
+                if ((Style == PassStyle.BoardingPass) && (!Enum.IsDefined(typeof(TransitType), TransitType)))
+                    throw new RequiredFieldValueMissingException("TransitType");
+
+
+                if (string.IsNullOrWhiteSpace(PassTypeIdentifier))
+                    throw new MissingStandardKeyException("PassTypeIdentifier");
+
+                if (string.IsNullOrWhiteSpace(Description))
+                    throw new MissingStandardKeyException("Description");
+
+                if (string.IsNullOrWhiteSpace(OrganizationName))
+                    throw new MissingStandardKeyException("OrganizationName");
+
+                if (string.IsNullOrWhiteSpace(SerialNumber))
+                    throw new MissingStandardKeyException("SerialNumber");
+
+                if (string.IsNullOrWhiteSpace(TeamIdentifier))
+                    throw new MissingStandardKeyException("TeamIdentifier");
+
+                if ((!Images.ContainsKey(PassbookImage.Icon)) || (!Images.ContainsKey(PassbookImage.IconRetina)))
+                    throw new RequiredIconImageMissingException();
+
+                return true;
+            }
+        }
 	}
 }

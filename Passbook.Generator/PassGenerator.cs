@@ -293,10 +293,12 @@ namespace Passbook.Generator
 
             try
             {
-                if (request.AppleWWDRCACertificate == null)
+                if (request.AppleWWDRCACertificate != null)
+                    return request.AppleWWDRCACertificate;
+                else if (request.AppleWWDRCACertificateByteArray == null)
                     return GetSpecifiedCertificateFromCertStore(APPLE_CERTIFICATE_THUMBPRINT, StoreName.CertificateAuthority);
                 else
-                    return GetCertificateFromBytes(request.AppleWWDRCACertificate, null);
+                    return GetCertificateFromBytes(request.AppleWWDRCACertificateByteArray, null);
             }
             catch (Exception exp)
             {
@@ -311,10 +313,12 @@ namespace Passbook.Generator
 
             try
             {
-                if (request.Certificate == null)
+                if (request.Certificate != null)
+                    return request.Certificate;
+                else if (request.CertificateByteArray == null)
                     return GetSpecifiedCertificateFromCertStore(request.CertThumbprint, StoreName.My);
                 else
-                    return GetCertificateFromBytes(request.Certificate, request.CertificatePassword);
+                    return GetCertificateFromBytes(request.CertificateByteArray, request.CertificatePassword);
             }
             catch (Exception exp)
             {
@@ -323,7 +327,7 @@ namespace Passbook.Generator
             }
         }
 
-        private static X509Certificate2 GetSpecifiedCertificateFromCertStore(string thumbPrint, StoreName storeName)
+        public static X509Certificate2 GetSpecifiedCertificateFromCertStore(string thumbPrint, StoreName storeName)
         {
             foreach (StoreLocation storeLocation in Enum.GetValues(typeof(StoreLocation)))
             {
@@ -342,7 +346,26 @@ namespace Passbook.Generator
             return null;
         }
 
-        private static X509Certificate2 GetCertificateFromBytes(byte[] bytes, string password)
+        public static X509Certificate2 GetSpecifiedCertifateFromCertStoreWithSubjectKeyIdentifier(string subjectKeyIdentifier, StoreName storeName)
+        {
+            foreach (StoreLocation storeLocation in Enum.GetValues(typeof(StoreLocation)))
+            {
+                X509Store store = new X509Store(storeName, storeLocation);
+                store.Open(OpenFlags.ReadOnly);
+
+                X509Certificate2Collection certs = store.Certificates.Find(X509FindType.FindBySubjectKeyIdentifier, subjectKeyIdentifier.ToLowerInvariant(), false);
+
+                if (certs.Count > 0)
+                {
+                    Debug.WriteLine(certs[0].Thumbprint);
+                    return certs[0];
+                }
+            }
+
+            return null;
+        }
+
+        public static X509Certificate2 GetCertificateFromBytes(byte[] bytes, string password)
         {
             Trace.TraceInformation("Opening Certificate: [{0}] bytes with password [{1}]", bytes.Length, password);
 
