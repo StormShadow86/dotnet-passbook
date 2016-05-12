@@ -27,5 +27,9 @@ namespace Passbook.Generator.Fields
 		/// Text
 		/// </summary>
 		PKBarcodeFormatText,
+        /// <summary>
+        /// Code128, Work only in barcodes array
+        /// </summary>
+        PKBarcodeFormatCode128
     } 
 }

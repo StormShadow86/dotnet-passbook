@@ -2,21 +2,20 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
     <metadata>
         <id>dotnet-passbook</id>
-        <version>0.9.9</version>
+        <version>1.0.0-alpha</version>
         <title>Passbook Generator</title>
         <authors>Tomas McGuinness</authors>
         <owners />
         <licenseUrl>http://tomasmcguinness.mit-license.org/</licenseUrl>
         <projectUrl>https://github.com/tomasmcguinness/dotnet-passbook</projectUrl>
         <requireLicenseAcceptance>true</requireLicenseAcceptance>
-        <description>Generate pass files for Apple's iOS 6.0 passbook. This library allows you to build and sign a pkpass file.</description>
-        <summary>Generate pass files for Apple's iOS 6.0 passbook.</summary>
-        <releaseNotes>Added support for AssociatedStoreIdentifiers allowing you to link a pass to an existing iOS App using its Apple Identifier</releaseNotes>
+        <description>Generate pass files for Apple's iOS 6.0 to iOS 9.0 passbook/Wallet. This library allows you to build and sign a pkpass file.</description>
+        <summary>Generate pass files for Apple's iOS 6.0 to iOS 9.0 passbook/Wallet.</summary>
+        <releaseNotes>Added support for barcodes allowing you to add an array of barcodes to a pass. Added support for Code128 barcode only available in barcodes array.</releaseNotes>
         <tags>PassBook Wallet</tags>
         <dependencies>
-            <group targetFramework=".NETFramework4.5">
-                <dependency id="Newtonsoft.Json" version="4.5.10" />
-                <dependency id="BouncyCastle" version="1.7.0" />
+            <group targetFramework=".NETFramework4.6.1">
+                <dependency id="Newtonsoft.Json" version="8.0.3" />
             </group>
         </dependencies>
     </metadata>

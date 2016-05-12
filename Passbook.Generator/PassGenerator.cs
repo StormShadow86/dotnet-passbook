@@ -29,6 +29,18 @@ namespace Passbook.Generator
         private const string APPLE_CERTIFICATE_THUMBPRINT = "FF6797793A3CD798DC5B2ABEF56F73EDC9F83A64";
         private const string passTypePrefix = "Pass Type ID: ";
 
+        public X509Certificate2 AppleCertificate
+        {
+            get { return appleCert; }
+            set { appleCert = value; }
+        }
+
+        public X509Certificate2 PassCertificate
+        {
+            get { return passCert; }
+            set { passCert = value; }
+        }
+
         public byte[] Generate(PassGeneratorRequest request)
         {
             if (request == null)
@@ -110,12 +122,14 @@ namespace Passbook.Generator
 
         private void ValidateCertificates(PassGeneratorRequest request)
         {
-            passCert = GetCertificate(request);
+            if (passCert == null)
+                passCert = GetCertificate(request);
 
             if (passCert == null)
                 throw new FileNotFoundException("Certificate could not be found. Please ensure the thumbprint and cert location values are correct.");
             
-            appleCert = GetAppleCertificate(request);
+            if (appleCert == null)
+                appleCert = GetAppleCertificate(request);
 
             if (appleCert == null)
                 throw new FileNotFoundException("Apple Certificate could not be found. Please download it from http://www.apple.com/certificateauthority/ and install it into your PERSONAL or LOCAL MACHINE certificate store.");
@@ -226,6 +240,8 @@ namespace Passbook.Generator
 							jsonWriter.WritePropertyName(string.Format("{0}.lproj/pass.strings", localization.Key.ToLower()));
 							jsonWriter.WriteValue(hash);
 						}
+
+                        jsonWriter.WriteEndObject();
                     }
 
                     manifestFile = ms.ToArray();
@@ -314,7 +330,7 @@ namespace Passbook.Generator
                 X509Store store = new X509Store(storeName, storeLocation);
                 store.Open(OpenFlags.ReadOnly);
 
-			    X509Certificate2Collection certs = store.Certificates.Find(X509FindType.FindByThumbprint, thumbPrint, false);
+			    X509Certificate2Collection certs = store.Certificates.Find(X509FindType.FindByThumbprint, thumbPrint.ToLowerInvariant(), false);
 
                 if (certs.Count > 0)
                 {

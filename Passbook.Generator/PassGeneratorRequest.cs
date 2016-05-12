@@ -1,4 +1,4 @@
-'using System;
+using System;
 using System.Linq;
 using Newtonsoft.Json;
 using Passbook.Generator.Fields;
@@ -104,6 +104,7 @@ namespace Passbook.Generator
 			this.SecondaryFields = new List<Field>();
 			this.AuxiliaryFields = new List<Field>();
 			this.BackFields = new List<Field>();
+            this.Barcodes = new List<BarCode>();
 			this.Images = new Dictionary<PassbookImage, byte[]>();
 			this.RelevantLocations = new List<RelevantLocation>();
 			this.RelevantBeacons = new List<RelevantBeacon>();
@@ -316,9 +317,14 @@ namespace Passbook.Generator
 		public List<Field> BackFields { get; private set; }
 
 		/// <summary>
-		/// Optional. Information specific to barcodes.
+		/// Optional. Information specific to barcodes. (iOS 8 and earlier)
 		/// </summary>
 		public BarCode Barcode { get; private set; }
+
+        /// <summary>
+        /// Optional. Information specific to barcodes. (iOS 9 and later)
+        /// </summary>
+        public List<BarCode> Barcodes { get; private set; }
 
 		/// <summary>
 		/// Required. Pass type.
@@ -455,27 +461,59 @@ namespace Passbook.Generator
 
 		public void AddBarCode(string message, BarcodeType type, string encoding, string altText)
 		{
+            if (type == BarcodeType.PKBarcodeFormatCode128)
+                throw new ArgumentException("Code128 is valid only in barcodes array");
 			Barcode = new BarCode()
 			{
 				Type = type,
 				Message = message,
 				Encoding = encoding,
 				AlternateText = altText
-			};       
+			};
+            if (!Barcodes.Contains(Barcode))
+                Barcodes.Add(Barcode);
 		}
 
 		public void AddBarCode(string message, BarcodeType type, string encoding)
 		{
-			Barcode = new BarCode() 
+            if (type == BarcodeType.PKBarcodeFormatCode128)
+                throw new ArgumentException("Code128 is valid only in barcodes array");
+            Barcode = new BarCode() 
 			{
 				Type = type,
 				Message = message,
 				Encoding = encoding,
 				AlternateText = null
 			};
-		}
+            if (!Barcodes.Contains(Barcode))
+                Barcodes.Add(Barcode);
+        }
 
-		public void AddLocation(double latitude, double longitude)
+        public void AddBarcodeToArray(string message, BarcodeType type, string encoding, string altText)
+        {
+            BarCode code = new BarCode()
+            {
+                Type = type,
+                Message = message,
+                Encoding = encoding,
+                AlternateText = altText
+            };
+            this.Barcodes.Add(code);
+        }
+
+        public void AddBarcodeToArray(string message, BarcodeType type, string encoding)
+        {
+            BarCode code = new BarCode()
+            {
+                Type = type,
+                Message = message,
+                Encoding = encoding,
+                AlternateText = null
+            };
+            this.Barcodes.Add(code);
+        }
+
+        public void AddLocation(double latitude, double longitude)
 		{
 			AddLocation(latitude, longitude, null);
 		}
@@ -559,12 +597,13 @@ namespace Passbook.Generator
 			CloseStyleSpecificKey(writer);
 
 			WriteBarcode(writer);
+            WriteBarcodes(writer);
 			WriteUrls(writer);
 
 			writer.WriteEndObject();
 		}
 
-		private void WriteRelevanceKeys(JsonWriter writer)
+        private void WriteRelevanceKeys(JsonWriter writer)
 		{
 			if (RelevantDate.HasValue)
 			{
@@ -623,10 +662,10 @@ namespace Passbook.Generator
 				writer.WritePropertyName("barcode");
 
 				writer.WriteStartObject();
-				writer.WritePropertyName("format");
-				writer.WriteValue(Barcode.Type.ToString());
-				writer.WritePropertyName("message");
-				writer.WriteValue(Barcode.Message);
+                writer.WritePropertyName("message");
+                writer.WriteValue(Barcode.Message);
+                writer.WritePropertyName("format");
+				writer.WriteValue(Barcode.Type.ToString());				
 				writer.WritePropertyName("messageEncoding");
 				writer.WriteValue(Barcode.Encoding);
 
@@ -640,7 +679,32 @@ namespace Passbook.Generator
 			}
 		}
 
-		private void WriteStandardKeys(JsonWriter writer)
+        private void WriteBarcodes(JsonWriter writer)
+        {
+            writer.WritePropertyName("barcodes");
+            writer.WriteStartArray();
+
+            foreach(var code in Barcodes)
+            {
+                writer.WriteStartObject();
+                writer.WritePropertyName("message");
+                writer.WriteValue(code.Message);
+                writer.WritePropertyName("format");
+                writer.WriteValue(code.Type.ToString());                
+                writer.WritePropertyName("messageEncoding");
+                writer.WriteValue(code.Encoding);
+
+                if (!String.IsNullOrEmpty(code.AlternateText))
+                {
+                    writer.WritePropertyName("altText");
+                    writer.WriteValue(code.AlternateText);
+                }
+
+                writer.WriteEndObject();
+            }
+        }
+
+        private void WriteStandardKeys(JsonWriter writer)
 		{
 			writer.WritePropertyName("passTypeIdentifier");
 			writer.WriteValue(PassTypeIdentifier);
