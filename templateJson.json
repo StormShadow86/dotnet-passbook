@@ -1,0 +1,102 @@
+{
+	"appleWWDRCACertificateInfo":
+	{
+		"appleWWDRCACertificatePath":"~/App_Data/AppleWWDRCA.cer",
+		"appleWWDRCACertificateThumbprint":"ff6797793a3cd798dc5b2abef56f73edc9f83a64",
+		"appleWWDRCACertificateStoreLocation":"CertificateAuthority"
+	},
+	"templates":[
+		{
+			"name":"Event",
+			"passTypeIdentifier":"pass.com.datorsis",
+			"teamIdentifier":"SQY9S578XQ",
+			"passStyle":"EventTicket",
+			"certificateInfo":
+			{
+				"certificatePath":"~/App_Data/Pass.cer",
+				"certificatePassword":"1234",
+				"certificateThumbprint":"5ccf3a8aa2adb19dfe2cd659ea35f898a9806845",
+				"certificateSubjectKeyIdentifier":"901b19ecfe0082d4188f6f0398ec763ad8dacd49",
+				"certificateStoreLocation":"Personnal"
+			},
+			"description":"My First Event Pass",
+			"organizationName":"Dator Inc.",
+			"logoText":"My Event Pass",
+			
+			"backgroundColor":"rgb(255,255,255)",
+			"foregroundColor":"rgb(0,0,0)",
+			"labelColor":"rgb(0,0,0)",
+			
+			"headerFields":[
+				{
+					"key":"header",
+					"label":"event-Name",
+					"value":"My Event",
+					"textAlignment":"PKTextAlignmentLeft",
+					"attributedValue":"",
+					"changeMessage":"",
+					"dateStyle":"PKDateStyleNone",
+					"ignoresTimeZone":false,
+					"isRelative":false,
+					"timeStyle":"PKDateStyleNone",
+					"currencyCode":"CAD",
+					"numberStyle":"PKNumberStyleDecimal"
+				}
+			],
+			
+			"primaryFields":[
+				{
+					"key":"eventName",
+					"label":"event-Name",
+					"value":"My Event"			
+				}
+			],
+			
+			"secondaryFields":[
+				{
+					"key":"eventName",
+					"label":"event-Name",
+					"value":"My Event"			
+				}
+			],
+			
+			"auxiliaryFields":[
+				{
+					"key":"eventName",
+					"label":"event-Name",
+					"value":"My Event"			
+				}
+			],
+			
+			"backFields":[
+				{
+					"key":"eventName",
+					"label":"event-Name",
+					"value":"My Event",
+					"dataDetectorType":[
+						"PKDataDetectorTypePhoneNumber",
+						"PKDataDetectorTypeLink"
+					]
+				}
+			],
+			
+			"transitType":"PKTransitTypeAir",
+			
+			"barcode": {
+				"message":"1234",
+				"format":"PKBarcodeFormatQR",
+				"messageEncoding":"Windows-1252",
+				"altText":"1234"
+			},
+			
+			"barcodes":[
+				{
+					"message":"1234",
+					"format":"PKBarcodeFormatQR",
+					"messageEncoding":"Windows-1252",
+					"altText":"1234"
+				}
+			]
+		}
+	]
+}
