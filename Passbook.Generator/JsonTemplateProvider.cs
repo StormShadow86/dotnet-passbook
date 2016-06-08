@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
-
+using Newtonsoft.Json;
 using Passbook.Generator.Fields;
 
 namespace Passbook.Generator
@@ -12,26 +13,66 @@ namespace Passbook.Generator
     public class JsonTemplateProvider
     {
         private JsonTemplateHolder _holder;
+        private string _filePath;
         
-        public void LoadJsonTemplateHolder()
+        public void LoadJsonTemplateHolder(string filePath)
         {
+            _filePath = filePath;
             throw new NotImplementedException();
         }
 
         public void SaveJsonTemplate(JsonTemplate template)
         {
-            throw new NotImplementedException();
+            if(_holder != null)
+            {
+                if (!_holder.JsonTemplates.Contains(template))
+                {
+                    _holder.JsonTemplates.Add(template);
+                }
+                else
+                {
+                    int pos = _holder.JsonTemplates.IndexOf(template);
+                    if (pos >= 0 && pos < _holder.JsonTemplates.Count)
+                    {
+                        _holder.JsonTemplates[pos] = template;
+                    }
+                }
+                SaveJsonTemplateHolder(_filePath);
+            }            
+        }
+
+        public void SaveJsonTemplateHolder(string filepath)
+        {
+            
         }
 
         public JsonTemplate LoadJsonTemplate(string templateName)
         {
-            throw new NotImplementedException();
+            JsonTemplate result;
+            if (_holder == null)
+                throw new InvalidOperationException("JsonTemplateHolder is not loaded.");
+
+            result = _holder.JsonTemplates.Find(x => x.Name == templateName);
+
+            if (result == null)
+            {
+                throw new KeyNotFoundException("Template not found");
+            }
+
+            return result;
         }
     }
 
+    [JsonObject(MemberSerialization = MemberSerialization.OptIn)]
     public class JsonTemplateHolder
     {
+        [JsonProperty(DefaultValueHandling = DefaultValueHandling.Include 
+            ,PropertyName = "appleWWDRCACertificate"
+            ,Required = Required.Always
+            ,Order = 1)]
         public AppleWWDRCACertificateInfo AppleWWDRCACertificate { get; set; }
+        
+
         public List<JsonTemplate> JsonTemplates { get; set; }
     }
 
@@ -51,6 +92,8 @@ namespace Passbook.Generator
         public StoreLocation CertificateStoreLocation { get; set; }
     }
 
+    [JsonArray(AllowNullItems = false
+            , Id = "templates")]
     public class JsonTemplate
     {
         public string Name { get; set; }
@@ -79,7 +122,7 @@ namespace Passbook.Generator
         public string AuthenticationToken { get; set; }
         public string WebServiceURL { get; set; }
 
-
+        public List<NFCPayload> NFCPayloads { get; set; }
 
         public List<Field> HeaderFields { get; set; }
         public List<Field> PrimaryFields { get; set; }
@@ -91,5 +134,34 @@ namespace Passbook.Generator
 
         public Dictionary<PassbookImage, string> Images { get; set; }
         public Dictionary<string, Dictionary<string, string>> Localizations { get; set; }
+
+        public override bool Equals(object obj)
+        {
+            if (obj == null)
+                return false;
+
+            if (ReferenceEquals(this, obj))
+                return true;
+
+            JsonTemplate other = obj as JsonTemplate;
+            if(other == null)
+            {
+                return false;
+            }
+            else
+            {
+                return this.Name.Equals(other.Name,StringComparison.InvariantCulture);
+            }
+        }
+
+        public override int GetHashCode()
+        {
+            return this.Name.GetHashCode();
+        }
+
+        public override string ToString()
+        {
+            return this.Name;
+        }
     }    
 }

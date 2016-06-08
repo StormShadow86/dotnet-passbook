@@ -10,7 +10,7 @@ namespace Passbook.Generator.Fields
     {
         public Field()
         {
-			this.DataDetectorTypes = DataDetectorTypes.PKDataDetectorAll;
+			this.DataDetectorTypes = DataDetectorTypes.PKDataDetectorTypePhoneNumber | DataDetectorTypes.PKDataDetectorTypeLink | DataDetectorTypes.PKDataDetectorTypeAddress | DataDetectorTypes.PKDataDetectorTypeCalendarEvent;
         }
 
 		public Field(string key, string label)
@@ -137,19 +137,17 @@ namespace Passbook.Generator.Fields
 
         private void WriteDataDetectorTypes(JsonWriter writer)
         {
-			if (DataDetectorTypes != Fields.DataDetectorTypes.PKDataDetectorAll)
-			{
-				writer.WritePropertyName("dataDetectorTypes");
-				writer.WriteStartArray();
-
-				foreach (Enum value in Enum.GetValues(typeof(DataDetectorTypes)))
-					if (value.CompareTo(DataDetectorTypes.PKDataDetectorNone) != 0 &&
-						value.CompareTo(DataDetectorTypes.PKDataDetectorAll) != 0 &&
-						DataDetectorTypes.HasFlag(value))
+            
+			writer.WritePropertyName("dataDetectorTypes");
+			writer.WriteStartArray();
+            if (DataDetectorTypes != Fields.DataDetectorTypes.None)
+            {
+                foreach (Enum value in Enum.GetValues(typeof(DataDetectorTypes)))
+					if (DataDetectorTypes.HasFlag(value))
 						writer.WriteValue(value.ToString());
-
-				writer.WriteEndArray();
-			}
+            }
+            writer.WriteEndArray();
+			
         }
 
         private void Validate()

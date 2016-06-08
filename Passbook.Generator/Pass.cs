@@ -9,7 +9,7 @@ namespace Passbook.Generator
 {
     public class Pass
     {
-        private string packagePathAndName;
+        private readonly string packagePathAndName;
 
         public Pass(string packagePathAndName)
         {

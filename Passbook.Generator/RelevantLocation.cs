@@ -58,12 +58,12 @@ namespace Passbook.Generator
 
         private void Validate()
         {
-            if (Latitude == double.MinValue)
+            if (Latitude <= double.MinValue)
             {
                 throw new RequiredFieldValueMissingException("latitude");
             }
 
-            if (Longitude == double.MinValue)
+            if (Longitude <= double.MinValue)
             {
                 throw new RequiredFieldValueMissingException("longitude");
             }

@@ -81,7 +81,7 @@ namespace Passbook.Generator.Configuration
 		/// <para>The default value is all data detectors. Provide an empty array to use no data detectors.</para>
 		/// <para>Data detectors are applied only to back fields.</para>
 		/// </summary>
-		[ConfigurationProperty("dataDetectorTypes", DefaultValue = DataDetectorTypes.PKDataDetectorAll, IsRequired = false, IsKey = false)]
+		[ConfigurationProperty("dataDetectorTypes", DefaultValue = DataDetectorTypes.PKDataDetectorTypePhoneNumber | DataDetectorTypes.PKDataDetectorTypeLink | DataDetectorTypes.PKDataDetectorTypeAddress | DataDetectorTypes.PKDataDetectorTypeCalendarEvent, IsRequired = false, IsKey = false)]
 		public DataDetectorTypes DataDetectorTypes
 		{
 			get { return (DataDetectorTypes)this["dataDetectorTypes"]; }

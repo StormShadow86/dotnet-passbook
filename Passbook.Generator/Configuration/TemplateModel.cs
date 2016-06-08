@@ -16,8 +16,8 @@ namespace Passbook.Generator.Configuration
 
 	public class TemplateModel
 	{
-		private Dictionary<string, object> mData;
-        private Dictionary<PassbookImage, byte[]> mImages;
+		private readonly Dictionary<string, object> mData;
+        private readonly Dictionary<PassbookImage, byte[]> mImages;
 
 		private static String FieldName(String key, FieldAttribute fieldAttribute)
 		{

@@ -111,7 +111,7 @@ namespace Passbook.Generator
 			this.RelevantBeacons = new List<RelevantBeacon>();
 			this.AssociatedStoreIdentifiers = new List<int>();
 			this.Localizations = new Dictionary<string, Dictionary<string, string>>(StringComparer.OrdinalIgnoreCase);
-
+            this.NfcPayloads = new List<NFCPayload>();
 			this.UserInfo = null;
 		}
 
@@ -125,7 +125,7 @@ namespace Passbook.Generator
 
 			String path = TemplateModel.MapPath(section.AppleWWDRCACertificate);
 			if (File.Exists(path))
-				this.AppleWWDRCACertificateByteArray = File.ReadAllBytes(path);
+				this.AppleWwdrcaCertificateByteArray = File.ReadAllBytes(path);
 
 			TemplateElement templateConfig = section
 				.Templates
@@ -159,7 +159,7 @@ namespace Passbook.Generator
 
 			// Associated App Keys
 			if (templateConfig.AppLaunchURL != null && !String.IsNullOrEmpty(templateConfig.AppLaunchURL.Value))
-				this.AppLaunchURL = templateConfig.AppLaunchURL.Value;
+				this.AppLaunchUrl = templateConfig.AppLaunchURL.Value;
 
 			this.AssociatedStoreIdentifiers.AddRange(templateConfig.AssociatedStoreIdentifiers.OfType<ConfigurationProperty<int>>().Select(s => s.Value));
 
@@ -240,10 +240,6 @@ namespace Passbook.Generator
 		/// Required. Display name of the organization that originated and signed the pass.
 		/// </summary>
 		public string OrganizationName { get; set; }
-
-		#endregion
-
-		#region "Companion App Keys"
 
 		#endregion
 
@@ -388,12 +384,12 @@ namespace Passbook.Generator
         /// <summary>
         /// A byte array containing the Apple WWDRCA X509 certificate
         /// </summary>
-        public byte[] AppleWWDRCACertificateByteArray { get; set; }
+        public byte[] AppleWwdrcaCertificateByteArray { get; set; }
 
         /// <summary>
         /// The Apple WWDRCA (Worldwide Developer Relations Certificate Authority) X509 certificate
         /// </summary>
-        public X509Certificate2 AppleWWDRCACertificate { get; set; }
+        public X509Certificate2 AppleWwdrcaCertificate { get; set; }
         
 		/// <summary>
 		/// The private key password for the certificate.
@@ -436,22 +432,32 @@ namespace Passbook.Generator
 
 		public List<int> AssociatedStoreIdentifiers { get; set; }
 
-		public string AppLaunchURL { get; set; }
+		public string AppLaunchUrl { get; set; }
 
-		#endregion
+        #endregion
 
-		#region User Info Keys
+        #region "Companion App Keys"
 
-		public Object UserInfo { get; set; }
+        #endregion
+
+        #region User Info Keys
+
+        public Object UserInfo { get; set; }
 
 		#endregion
 
 		#region Localization
 		public Dictionary<string, Dictionary<string, string>> Localizations { get; set; }
-		#endregion
+        #endregion
 
-		#region Helpers
-		public void AddHeaderField(Field field)
+        #region NFC "Apple Pay"
+
+        public List<NFCPayload> NfcPayloads { get; private set; }
+
+        #endregion
+
+        #region Helpers
+        public void AddHeaderField(Field field)
 		{
 			this.HeaderFields.Add(field);
 		}
@@ -568,6 +574,11 @@ namespace Passbook.Generator
 			values[key] = value;
 		}
 
+        public void AddNfcPayload(string message, string encryptionPublicKey)
+        {
+            this.NfcPayloads.Add(new NFCPayload() { Message = message, EncryptionPublicKey = encryptionPublicKey });
+        }
+
 		public virtual void PopulateFields()
 		{
 			// NO OP.
@@ -613,12 +624,40 @@ namespace Passbook.Generator
 			Trace.TraceInformation("Closing style section..");
 			CloseStyleSpecificKey(writer);
 
-			WriteBarcode(writer);
+            if (this.Style == PassStyle.StoreCard)
+            {
+                WriteNfcPayload(writer);
+            }
+
+            WriteBarcode(writer);
             WriteBarcodes(writer);
 			WriteUrls(writer);
 
 			writer.WriteEndObject();
 		}
+
+        private void WriteNfcPayload(JsonWriter writer)
+        {
+            if (NfcPayloads.Count > 0)
+            {
+                writer.WritePropertyName("nfc");
+                writer.WriteStartArray();
+
+                foreach(NFCPayload payload in NfcPayloads)
+                {
+                    writer.WriteStartObject();
+
+                    writer.WritePropertyName("message");
+                    writer.WriteValue(payload.Message);
+                    writer.WritePropertyName("encryptionPublicKey");
+                    writer.WriteValue(payload.EncryptionPublicKey);
+
+                    writer.WriteEndObject();
+                }
+
+                writer.WriteEndArray();
+            }
+        }
 
         private void WriteRelevanceKeys(JsonWriter writer)
 		{
@@ -851,37 +890,35 @@ namespace Passbook.Generator
         /// <summary>
         /// Validate the pass request by checking the required fields for opening pkpass in iOS
         /// </summary>
-        public bool IsValid
+        public bool IsValid()
         {
-            get
-            {
-                if (!Enum.IsDefined(typeof(PassStyle), Style))
-                    throw new MissingStandardKeyException("Style");
+            
+            if (!Enum.IsDefined(typeof(PassStyle), Style))
+                throw new MissingStandardKeyException("Style");
 
-                if ((Style == PassStyle.BoardingPass) && (!Enum.IsDefined(typeof(TransitType), TransitType)))
-                    throw new RequiredFieldValueMissingException("TransitType");
+            if ((Style == PassStyle.BoardingPass) && (!Enum.IsDefined(typeof(TransitType), TransitType)))
+                throw new RequiredFieldValueMissingException("TransitType");
 
 
-                if (string.IsNullOrWhiteSpace(PassTypeIdentifier))
-                    throw new MissingStandardKeyException("PassTypeIdentifier");
+            if (string.IsNullOrWhiteSpace(PassTypeIdentifier))
+                throw new MissingStandardKeyException("PassTypeIdentifier");
 
-                if (string.IsNullOrWhiteSpace(Description))
-                    throw new MissingStandardKeyException("Description");
+            if (string.IsNullOrWhiteSpace(Description))
+                throw new MissingStandardKeyException("Description");
 
-                if (string.IsNullOrWhiteSpace(OrganizationName))
-                    throw new MissingStandardKeyException("OrganizationName");
+            if (string.IsNullOrWhiteSpace(OrganizationName))
+                throw new MissingStandardKeyException("OrganizationName");
 
-                if (string.IsNullOrWhiteSpace(SerialNumber))
-                    throw new MissingStandardKeyException("SerialNumber");
+            if (string.IsNullOrWhiteSpace(SerialNumber))
+                throw new MissingStandardKeyException("SerialNumber");
 
-                if (string.IsNullOrWhiteSpace(TeamIdentifier))
-                    throw new MissingStandardKeyException("TeamIdentifier");
+            if (string.IsNullOrWhiteSpace(TeamIdentifier))
+                throw new MissingStandardKeyException("TeamIdentifier");
 
-                if ((!Images.ContainsKey(PassbookImage.Icon)) || (!Images.ContainsKey(PassbookImage.IconRetina)))
-                    throw new RequiredIconImageMissingException();
+            if ((!Images.ContainsKey(PassbookImage.Icon)) || (!Images.ContainsKey(PassbookImage.IconRetina)))
+                throw new RequiredIconImageMissingException();
 
-                return true;
-            }
+            return true;
         }
 	}
 }

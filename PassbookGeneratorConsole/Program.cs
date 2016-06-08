@@ -171,7 +171,7 @@ namespace PassbookGeneratorConsole
                 //generator.AppleCertificate = GetAppleCertificate();
                 //generator.PassCertificate = GetPassCertificate();
 
-                request.AppleWWDRCACertificate = GetAppleCertificate();
+                request.AppleWwdrcaCertificate = GetAppleCertificate();
                 request.Certificate = GetPassCertificate();
 
                 request.PassTypeIdentifier = "pass.datorsis.com";
