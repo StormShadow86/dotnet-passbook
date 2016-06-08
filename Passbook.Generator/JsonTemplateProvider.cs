@@ -18,6 +18,7 @@ namespace Passbook.Generator
         public void LoadJsonTemplateHolder(string filePath)
         {
             _filePath = filePath;
+            _holder = new JsonTemplateHolder();
             throw new NotImplementedException();
         }
 
@@ -43,7 +44,7 @@ namespace Passbook.Generator
 
         public void SaveJsonTemplateHolder(string filepath)
         {
-            
+            throw new NotImplementedException();
         }
 
         public JsonTemplate LoadJsonTemplate(string templateName)
@@ -70,17 +71,17 @@ namespace Passbook.Generator
             ,PropertyName = "appleWWDRCACertificate"
             ,Required = Required.Always
             ,Order = 1)]
-        public AppleWWDRCACertificateInfo AppleWWDRCACertificate { get; set; }
+        public AppleWwdrcaCertificateInfo AppleWwdrcaCertificate { get; set; }
         
 
         public List<JsonTemplate> JsonTemplates { get; set; }
     }
 
-    public class AppleWWDRCACertificateInfo
+    public class AppleWwdrcaCertificateInfo
     {
-        public string AppleWWDRCACertificatePath { get; set; }
-        public string AppleWWDRCACertificateThumbprint { get; set; }
-        public StoreLocation AppleWWDRCACertificateStoreLocation { get; set; }
+        public string AppleWwdrcaCertificatePath { get; set; }
+        public string AppleWwdrcaCertificateThumbprint { get; set; }
+        public StoreLocation AppleWwdrcaCertificateStoreLocation { get; set; }
     }
 
     public class CertificateInfo
@@ -105,7 +106,7 @@ namespace Passbook.Generator
         public string Description { get; set; }
         public string OrganizationName { get; set; }       
 
-        public string AppLaunchURL { get; set; }
+        public string AppLaunchUrl { get; set; }
         public List<int> AssociatedStoreIdentifiers { get; set; }
 
         public List<RelevantBeacon> Beacons { get; set; }
@@ -120,9 +121,9 @@ namespace Passbook.Generator
         public bool? SuppressStripShine { get; set; }
 
         public string AuthenticationToken { get; set; }
-        public string WebServiceURL { get; set; }
+        public string WebServiceUrl { get; set; }
 
-        public List<NFCPayload> NFCPayloads { get; set; }
+        public List<NfcPayload> NfcPayloads { get; set; }
 
         public List<Field> HeaderFields { get; set; }
         public List<Field> PrimaryFields { get; set; }

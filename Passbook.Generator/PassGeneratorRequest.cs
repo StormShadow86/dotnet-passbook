@@ -111,7 +111,7 @@ namespace Passbook.Generator
 			this.RelevantBeacons = new List<RelevantBeacon>();
 			this.AssociatedStoreIdentifiers = new List<int>();
 			this.Localizations = new Dictionary<string, Dictionary<string, string>>(StringComparer.OrdinalIgnoreCase);
-            this.NfcPayloads = new List<NFCPayload>();
+            this.NfcPayloads = new List<NfcPayload>();
 			this.UserInfo = null;
 		}
 
@@ -452,7 +452,7 @@ namespace Passbook.Generator
 
         #region NFC "Apple Pay"
 
-        public List<NFCPayload> NfcPayloads { get; private set; }
+        public List<NfcPayload> NfcPayloads { get; private set; }
 
         #endregion
 
@@ -576,7 +576,7 @@ namespace Passbook.Generator
 
         public void AddNfcPayload(string message, string encryptionPublicKey)
         {
-            this.NfcPayloads.Add(new NFCPayload() { Message = message, EncryptionPublicKey = encryptionPublicKey });
+            this.NfcPayloads.Add(new NfcPayload() { Message = message, EncryptionPublicKey = encryptionPublicKey });
         }
 
 		public virtual void PopulateFields()
@@ -643,7 +643,7 @@ namespace Passbook.Generator
                 writer.WritePropertyName("nfc");
                 writer.WriteStartArray();
 
-                foreach(NFCPayload payload in NfcPayloads)
+                foreach(NfcPayload payload in NfcPayloads)
                 {
                     writer.WriteStartObject();
 

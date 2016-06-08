@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Passbook.Generator.Fields
 {
-    public class NFCPayload
+    public class NfcPayload
     {
         /// <summary>
         /// Required. The payload to be transmitted to the Apple Pay terminal.

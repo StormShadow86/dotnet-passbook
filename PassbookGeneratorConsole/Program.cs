@@ -15,18 +15,17 @@ using Passbook.Generator.Fields;
 
 namespace PassbookGeneratorConsole
 {
-    class Program
+    static class Program
     {
         private static ILogger _logger;
 
-        static void Main(string[] args)
+        static void Main()
         {
-            byte[] passFile = null;
             string passPath = null;
 
             ConfigureLogger();
             Console.WriteLine("Creating Pass...");
-            passFile = CreatePassPackage();
+            byte[] passFile = CreatePassPackage();
             if (passFile != null)
             {
                 Console.WriteLine("Pass generated.");
@@ -100,7 +99,7 @@ namespace PassbookGeneratorConsole
             catch (Exception ex)
             {
                 _logger.Error<Exception>(ex.StackTrace, ex);
-                throw ex;
+                throw;
             }
 
             if (appleCert == null)
@@ -109,11 +108,6 @@ namespace PassbookGeneratorConsole
             }
 
             return appleCert;
-        }
-
-        private static byte[] GetAppleCertificateBytes()
-        {           
-            return GetAppleCertificate().GetRawCertData();
         }
 
         /// <summary>
@@ -144,7 +138,7 @@ namespace PassbookGeneratorConsole
             catch (Exception ex)
             {
                 _logger.Error<Exception>(ex.StackTrace, ex);
-                throw ex;
+                throw;
             }
 
             if (passCert == null)
@@ -155,11 +149,6 @@ namespace PassbookGeneratorConsole
             return passCert;
         }
 
-        private static byte[] GetPassCertificateBytes()
-        {
-            return GetPassCertificate().GetRawCertData();
-        }
-
         private static byte[] CreatePassPackage()
         {
             byte[] generatedPass = null;
@@ -167,9 +156,6 @@ namespace PassbookGeneratorConsole
             {
                 PassGenerator generator = new PassGenerator();
                 PassGeneratorRequest request = new PassGeneratorRequest();
-
-                //generator.AppleCertificate = GetAppleCertificate();
-                //generator.PassCertificate = GetPassCertificate();
 
                 request.AppleWwdrcaCertificate = GetAppleCertificate();
                 request.Certificate = GetPassCertificate();
@@ -221,12 +207,7 @@ namespace PassbookGeneratorConsole
             return generatedPass;
         }
 
-        private static void SendPass(byte[] pass)
-        {
-
-        }
-
-        private static void SendPass(string passPath)
+        private static void SendPass(string passPath, bool addBcc = false)
         {
             using (var emailSender = new SmtpClient("smtp.1and1.com", 587))
             {
@@ -237,7 +218,10 @@ namespace PassbookGeneratorConsole
 
                 using (var msg = new MailMessage("webadmin@datorsis.com", "stormshadow666@gmail.com", "Test Passbook", ""))
                 {
-                    //msg.Bcc.Add("stormshadow666@gmail.com");
+                    if (addBcc)
+                    {
+                        msg.Bcc.Add("stormshadow666@gmail.com");
+                    }
                     msg.Attachments.Add(new Attachment(passPath, "application/vnd.apple.pkpass"));
                     emailSender.Send(msg);
                 }
