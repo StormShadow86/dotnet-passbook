@@ -6,6 +6,7 @@ using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using Passbook.Generator.Fields;
 
 namespace Passbook.Generator
@@ -19,7 +20,28 @@ namespace Passbook.Generator
         {
             _filePath = filePath;
             _holder = new JsonTemplateHolder();
-            throw new NotImplementedException();
+
+            using (FileStream fs = new FileStream(_filePath, FileMode.Open))
+            {
+                using (StreamReader sr = new StreamReader(fs))
+                {
+                    using (JsonReader reader = new JsonTextReader(sr))
+                    {
+                        while (reader.Read())
+                        {
+                            if (reader.Value != null)
+                            {
+                                Console.WriteLine("Token: {0}, Value: {1}", reader.TokenType, reader.Value);
+                            }
+                            else
+                            {
+                               Console.WriteLine("Token: {0}", reader.TokenType); 
+                            }
+                        }
+                    }
+                }
+                
+            }           
         }
 
         public void SaveJsonTemplate(JsonTemplate template)

@@ -436,10 +436,6 @@ namespace Passbook.Generator
 
         #endregion
 
-        #region "Companion App Keys"
-
-        #endregion
-
         #region User Info Keys
 
         public Object UserInfo { get; set; }
@@ -885,7 +881,133 @@ namespace Passbook.Generator
 
 			writer.WriteEndArray();
 		}
-        #endregion        
+
+	    internal void Read(JsonReader reader)
+	    {
+	        PopulateFields();
+
+	        while (reader.Read())
+	        {
+                Trace.TraceInformation("Reading standard keys..");
+                ReadStandardKeys(reader);
+                Trace.TraceInformation("Reading user information..");
+                //ReadUserInfo(reader);
+            }
+
+            //Trace.TraceInformation("Writing user information..");
+            //WriteUserInfo(writer);
+            //Trace.TraceInformation("Writing relevance keys..");
+            //WriteRelevanceKeys(writer);
+            //Trace.TraceInformation("Writing appearance keys..");
+            //WriteAppearanceKeys(writer);
+            //Trace.TraceInformation("Writing expiration keys..");
+            //WriteExpirationKeys(writer);
+
+            //Trace.TraceInformation("Opening style section..");
+            //OpenStyleSpecificKey(writer);
+
+            //Trace.TraceInformation("Writing header fields");
+            //WriteSection(writer, "headerFields", this.HeaderFields);
+            //Trace.TraceInformation("Writing primary fields");
+            //WriteSection(writer, "primaryFields", this.PrimaryFields);
+            //Trace.TraceInformation("Writing secondary fields");
+            //WriteSection(writer, "secondaryFields", this.SecondaryFields);
+            //Trace.TraceInformation("Writing auxiliary fields");
+            //WriteSection(writer, "auxiliaryFields", this.AuxiliaryFields);
+            //Trace.TraceInformation("Writing back fields");
+            //WriteSection(writer, "backFields", this.BackFields);
+
+            //if (this.Style == PassStyle.BoardingPass)
+            //{
+            //    writer.WritePropertyName("transitType");
+            //    writer.WriteValue(this.TransitType.ToString());
+            //}
+
+            //Trace.TraceInformation("Closing style section..");
+            //CloseStyleSpecificKey(writer);
+
+            //if (this.Style == PassStyle.StoreCard)
+            //{
+            //    WriteNfcPayload(writer);
+            //}
+
+            //WriteBarcode(writer);
+            //WriteBarcodes(writer);
+            //WriteUrls(writer);
+
+            //writer.WriteEndObject();
+
+        }
+
+        private void ReadStandardKeys(JsonReader reader)
+        {
+            if (reader.Value != null)
+            {
+                if (reader.TokenType == JsonToken.PropertyName)                    
+                {
+                    if (reader.Value.ToString().Equals("passTypeIdentifier", StringComparison.InvariantCulture))
+                    {
+                        this.PassTypeIdentifier = reader.ReadAsString();
+                        if (!reader.Read())
+                            return;
+                    }
+                    if (reader.Value.ToString().Equals("formatVersion", StringComparison.InvariantCulture))
+                    {
+                        reader.ReadAsInt32();
+                        if (!reader.Read())
+                            return;
+                    }
+                    if (reader.Value.ToString().Equals("serialNumber", StringComparison.InvariantCulture))
+                    {
+                        this.SerialNumber = reader.ReadAsString();
+                        if (!reader.Read())
+                            return;
+                    }
+                    if (reader.Value.ToString().Equals("description", StringComparison.InvariantCulture))
+                    {
+                        this.Description = reader.ReadAsString();
+                        if (!reader.Read())
+                            return;
+                    }
+                    if (reader.Value.ToString().Equals("organizationName", StringComparison.InvariantCulture))
+                    {
+                        this.OrganizationName = reader.ReadAsString();
+                        if (!reader.Read())
+                            return;
+                    }
+                    if (reader.Value.ToString().Equals("teamIdentifier", StringComparison.InvariantCulture))
+                    {
+                        this.TeamIdentifier = reader.ReadAsString();
+                        if (!reader.Read())
+                            return;
+                    }
+                    if (reader.Value.ToString().Equals("logoText", StringComparison.InvariantCulture))
+                    {
+                        this.LogoText = reader.ReadAsString();
+                        if (!reader.Read())
+                            return;
+                    }
+                    if (reader.Value.ToString().Equals("associatedStoreIdentifiers"))
+                    {
+                        reader.Read();
+                        if (reader.TokenType == JsonToken.StartArray)
+                        {
+                            reader.Read();
+                        }
+                        while (reader.TokenType == JsonToken.Integer)
+                        {
+                            int? storeIdentifier = reader.ReadAsInt32();
+                            if (storeIdentifier.HasValue)
+                            {
+                                this.AssociatedStoreIdentifiers.Add(storeIdentifier.Value);
+                            }
+                        }                        
+                    }
+                }                
+            }
+
+        }
+        #endregion
 
         /// <summary>
         /// Validate the pass request by checking the required fields for opening pkpass in iOS

@@ -2,6 +2,7 @@
 using System.IO;
 using System.Net;
 using System.Net.Mail;
+using System.Runtime.Remoting.Channels;
 using System.Security.Cryptography.X509Certificates;
 
 using NLog;
@@ -20,6 +21,37 @@ namespace PassbookGeneratorConsole
         private static ILogger _logger;
 
         static void Main()
+        {
+            Console.WriteLine("What do you want to do?");
+            Console.WriteLine("1 - Create Example Pass");
+            Console.WriteLine("2 - Test json template load");
+            Console.WriteLine("Enter your choice (1 or 2) and press Enter");
+            string answer = Console.ReadLine();
+            int choice = 0;
+            if (int.TryParse(answer, out choice))
+            {
+                switch (choice)
+                {
+                    case 1:
+                        CreateExamplePass();
+                        break;
+                    case 2:
+                        TestJsonTemplateLoad();
+                        break;
+                }
+            }
+            
+            Console.WriteLine("Press any key to exit");
+            Console.ReadLine();
+        }
+
+        private static void TestJsonTemplateLoad()
+        {
+            JsonTemplateProvider provider = new JsonTemplateProvider();
+            provider.LoadJsonTemplateHolder(@"D:\inetpub\wwwroot\Bonobo.Git.Server\App_Data\Repositories\dotnet-passbook\templateJson.json");
+        }
+
+        private static void CreateExamplePass()
         {
             string passPath = null;
 
@@ -49,8 +81,6 @@ namespace PassbookGeneratorConsole
             {
                 Console.WriteLine("Problem creating pass...");
             }
-            Console.WriteLine("Press any key to exit");
-            Console.ReadLine();
         }
 
         private static void ConfigureLogger()
