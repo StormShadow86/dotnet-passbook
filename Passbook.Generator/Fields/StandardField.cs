@@ -19,7 +19,7 @@ namespace Passbook.Generator.Fields
 			: this(key, label, value)
         {
             this.AttributedValue = attributedValue;
-			this.DataDetectorTypes = DataDetectorTypes.PKDataDetectorAll;
+			this.DataDetectorTypes = DataDetectorTypes.PKDataDetectorTypePhoneNumber | DataDetectorTypes.PKDataDetectorTypeLink | DataDetectorTypes.PKDataDetectorTypeAddress | DataDetectorTypes.PKDataDetectorTypeCalendarEvent;
         }
 
         public string Value { get; set; }

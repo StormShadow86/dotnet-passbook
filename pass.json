@@ -1,0 +1,71 @@
+{
+  "passTypeIdentifier": "pass.com.datorsis",
+  "formatVersion": 1,
+  "serialNumber": "d3ce6840-a9ef-4757-be88-75308ed33218",
+  "description": "DatorSiS Pass",
+  "organizationName": "Dator Inc.",
+  "teamIdentifier": "SQY9S578XQ",
+  "logoText": "DatorSiS Pass",
+  "foregroundColor": "rgb(0,0,0)",
+  "backgroundColor": "rgb(255,255,255)",
+  "eventTicket": {
+    "headerFields": [
+      {
+        "key": "eventName",
+        "label": "Event Name",
+        "value": "Au Sommet Place Ville-Marie Observatoire"
+      }
+    ],
+    "primaryFields": [
+      {
+        "key": "eventName",
+        "label": "Event Name",
+        "value": "Au Sommet Place Ville-Marie Observatoire"
+      },
+      {
+        "key": "customerName",
+        "label": "Customer Name",
+        "value": "Sven Conard"
+      },
+      {
+        "key": "purchaseDate",
+        "label": "Purchase Date",
+        "dateStyle": "PKDateStyleShort",
+        "timeStyle": "PKDateStyleShort",
+        "value": "2016-05-12T03:11Z"
+      }
+    ],
+    "secondaryFields": [
+      {
+        "key": "eventDate",
+        "label": "Event Date",
+        "dateStyle": "PKDateStyleShort",
+        "timeStyle": "PKDateStyleNone",
+        "value": "2016-05-12T00:00Z"
+      },
+      {
+        "key": "eventTime",
+        "label": "Event Time",
+        "dateStyle": "PKDateStyleNone",
+        "timeStyle": "PKDateStyleShort",
+        "value": "2016-05-12T03:11Z"
+      }
+    ],
+    "auxiliaryFields": [],
+    "backFields": []
+  },
+  "barcode": {
+    "message": "BE411604",
+    "format": "PKBarcodeFormatQR",
+    "messageEncoding": "Windows-1252",
+    "altText": "BE411604"
+  },
+  "barcodes": [
+    {
+      "message": "BE411604",
+      "format": "PKBarcodeFormatQR",
+      "messageEncoding": "Windows-1252",
+      "altText": "BE411604"
+    }
+  ]
+}

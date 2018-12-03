@@ -4,10 +4,10 @@
         <id>dotnet-passbook</id>
         <version>1.0.0-alpha</version>
         <title>Passbook Generator</title>
-        <authors>Tomas McGuinness</authors>
+        <authors>Tomas McGuinness, Sven Conard (Forked)</authors>
         <owners />
         <licenseUrl>http://tomasmcguinness.mit-license.org/</licenseUrl>
-        <projectUrl>https://github.com/tomasmcguinness/dotnet-passbook</projectUrl>
+        <projectUrl>https://github.com/StormShadow86/dotnet-passbook</projectUrl>
         <requireLicenseAcceptance>true</requireLicenseAcceptance>
         <description>Generate pass files for Apple's iOS 6.0 to iOS 9.0 passbook/Wallet. This library allows you to build and sign a pkpass file.</description>
         <summary>Generate pass files for Apple's iOS 6.0 to iOS 9.0 passbook/Wallet.</summary>

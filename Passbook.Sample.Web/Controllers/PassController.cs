@@ -26,8 +26,11 @@ namespace Passbook.Sample.Web.Controllers
 
         public ActionResult Coupon()
         {
-            return View();
+            return View();            
+        }
 
+        public ActionResult CreateCouponPass()
+        {
             PassGenerator generator = new PassGenerator();
 
             CouponPassGeneratorRequest request = new CouponPassGeneratorRequest();

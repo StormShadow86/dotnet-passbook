@@ -2,6 +2,7 @@
 using System.IO;
 using System.Net;
 using System.Net.Mail;
+using System.Runtime.Remoting.Channels;
 using System.Security.Cryptography.X509Certificates;
 
 using NLog;
@@ -15,18 +16,48 @@ using Passbook.Generator.Fields;
 
 namespace PassbookGeneratorConsole
 {
-    class Program
+    static class Program
     {
         private static ILogger _logger;
 
-        static void Main(string[] args)
+        static void Main()
         {
-            byte[] passFile = null;
+            Console.WriteLine("What do you want to do?");
+            Console.WriteLine("1 - Create Example Pass");
+            Console.WriteLine("2 - Test json template load");
+            Console.WriteLine("Enter your choice (1 or 2) and press Enter");
+            string answer = Console.ReadLine();
+            int choice = 0;
+            if (int.TryParse(answer, out choice))
+            {
+                switch (choice)
+                {
+                    case 1:
+                        CreateExamplePass();
+                        break;
+                    case 2:
+                        TestJsonTemplateLoad();
+                        break;
+                }
+            }
+            
+            Console.WriteLine("Press any key to exit");
+            Console.ReadLine();
+        }
+
+        private static void TestJsonTemplateLoad()
+        {
+            JsonTemplateProvider provider = new JsonTemplateProvider();
+            provider.LoadJsonTemplateHolder(@"D:\inetpub\wwwroot\Bonobo.Git.Server\App_Data\Repositories\dotnet-passbook\templateJson.json");
+        }
+
+        private static void CreateExamplePass()
+        {
             string passPath = null;
 
             ConfigureLogger();
             Console.WriteLine("Creating Pass...");
-            passFile = CreatePassPackage();
+            byte[] passFile = CreatePassPackage();
             if (passFile != null)
             {
                 Console.WriteLine("Pass generated.");
@@ -50,8 +81,6 @@ namespace PassbookGeneratorConsole
             {
                 Console.WriteLine("Problem creating pass...");
             }
-            Console.WriteLine("Press any key to exit");
-            Console.ReadLine();
         }
 
         private static void ConfigureLogger()
@@ -100,7 +129,7 @@ namespace PassbookGeneratorConsole
             catch (Exception ex)
             {
                 _logger.Error<Exception>(ex.StackTrace, ex);
-                throw ex;
+                throw;
             }
 
             if (appleCert == null)
@@ -109,11 +138,6 @@ namespace PassbookGeneratorConsole
             }
 
             return appleCert;
-        }
-
-        private static byte[] GetAppleCertificateBytes()
-        {           
-            return GetAppleCertificate().GetRawCertData();
         }
 
         /// <summary>
@@ -144,7 +168,7 @@ namespace PassbookGeneratorConsole
             catch (Exception ex)
             {
                 _logger.Error<Exception>(ex.StackTrace, ex);
-                throw ex;
+                throw;
             }
 
             if (passCert == null)
@@ -155,11 +179,6 @@ namespace PassbookGeneratorConsole
             return passCert;
         }
 
-        private static byte[] GetPassCertificateBytes()
-        {
-            return GetPassCertificate().GetRawCertData();
-        }
-
         private static byte[] CreatePassPackage()
         {
             byte[] generatedPass = null;
@@ -168,10 +187,7 @@ namespace PassbookGeneratorConsole
                 PassGenerator generator = new PassGenerator();
                 PassGeneratorRequest request = new PassGeneratorRequest();
 
-                //generator.AppleCertificate = GetAppleCertificate();
-                //generator.PassCertificate = GetPassCertificate();
-
-                request.AppleWWDRCACertificate = GetAppleCertificate();
+                request.AppleWwdrcaCertificate = GetAppleCertificate();
                 request.Certificate = GetPassCertificate();
 
                 request.PassTypeIdentifier = "pass.datorsis.com";
@@ -187,7 +203,7 @@ namespace PassbookGeneratorConsole
 
                 request.Style = PassStyle.EventTicket;
 
-                request.AddPrimaryField(new StandardField("eventName", "event-Name", "Mega Parc - Manèges Grande Roue"));
+                request.AddPrimaryField(new StandardField("eventName", "event-Name", "Au Sommet Place Ville-Marie Observatoire"));
                 request.AddPrimaryField(new StandardField("customerName", "customer-Name", "Sven Conard"));
 
                 request.AddSecondaryField(new DateField("eventDate", "event-Date", FieldDateTimeStyle.PKDateStyleShort, FieldDateTimeStyle.PKDateStyleNone, DateTime.UtcNow.Date));
@@ -196,9 +212,7 @@ namespace PassbookGeneratorConsole
                 request.AddBarCode("BE411604", BarcodeType.PKBarcodeFormatQR, "Windows-1252", "BE411604");
 
                 request.Images.Add(PassbookImage.Icon, File.ReadAllBytes(@"E:\Programmation\dotnet-passbook-sis\PassbookGeneratorConsole\icon.png"));
-                request.Images.Add(PassbookImage.IconRetina, File.ReadAllBytes(@"E:\Programmation\dotnet-passbook-sis\PassbookGeneratorConsole\icon@2x.png"));
-                request.Images.Add(PassbookImage.Logo, File.ReadAllBytes(@"E:\Programmation\dotnet-passbook-sis\PassbookGeneratorConsole\logo.png"));
-                request.Images.Add(PassbookImage.LogoRetina, File.ReadAllBytes(@"E:\Programmation\dotnet-passbook-sis\PassbookGeneratorConsole\logo@2x.png"));
+                request.Images.Add(PassbookImage.IconRetina, File.ReadAllBytes(@"E:\Programmation\dotnet-passbook-sis\PassbookGeneratorConsole\icon@2x.png"));                
 
                 request.AddLocalization("fr", "event-Name", "Événement");
                 request.AddLocalization("fr", "customer-Name", "Nom du client");
@@ -223,23 +237,21 @@ namespace PassbookGeneratorConsole
             return generatedPass;
         }
 
-        private static void SendPass(byte[] pass)
+        private static void SendPass(string passPath, bool addBcc = false)
         {
-
-        }
-
-        private static void SendPass(string passPath)
-        {
-            using (var emailSender = new SmtpClient("smtp.office365.com", 587))
+            using (var emailSender = new SmtpClient("smtp.1and1.com", 587))
             {
                 emailSender.DeliveryMethod = SmtpDeliveryMethod.Network;
                 emailSender.EnableSsl = true;
 
                 emailSender.Credentials = new NetworkCredential("webadmin@datorsis.com", "202stv2684");
 
-                using (var msg = new MailMessage("webadmin@datorsis.com", "stremblay@datorsis.com", "Test Passbook", ""))
+                using (var msg = new MailMessage("webadmin@datorsis.com", "stormshadow666@gmail.com", "Test Passbook", ""))
                 {
-                    msg.Bcc.Add("stormshadow666@gmail.com");
+                    if (addBcc)
+                    {
+                        msg.Bcc.Add("stormshadow666@gmail.com");
+                    }
                     msg.Attachments.Add(new Attachment(passPath, "application/vnd.apple.pkpass"));
                     emailSender.Send(msg);
                 }

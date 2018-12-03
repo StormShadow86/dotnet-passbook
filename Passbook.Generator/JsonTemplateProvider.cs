@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
-
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using Passbook.Generator.Fields;
 
 namespace Passbook.Generator
@@ -12,34 +14,96 @@ namespace Passbook.Generator
     public class JsonTemplateProvider
     {
         private JsonTemplateHolder _holder;
+        private string _filePath;
         
-        public void LoadJsonTemplateHolder()
+        public void LoadJsonTemplateHolder(string filePath)
         {
-            throw new NotImplementedException();
+            _filePath = filePath;
+            _holder = new JsonTemplateHolder();
+
+            using (FileStream fs = new FileStream(_filePath, FileMode.Open))
+            {
+                using (StreamReader sr = new StreamReader(fs))
+                {
+                    using (JsonReader reader = new JsonTextReader(sr))
+                    {
+                        while (reader.Read())
+                        {
+                            if (reader.Value != null)
+                            {
+                                Console.WriteLine("Token: {0}, Value: {1}", reader.TokenType, reader.Value);
+                            }
+                            else
+                            {
+                               Console.WriteLine("Token: {0}", reader.TokenType); 
+                            }
+                        }
+                    }
+                }
+                
+            }           
         }
 
         public void SaveJsonTemplate(JsonTemplate template)
+        {
+            if(_holder != null)
+            {
+                if (!_holder.JsonTemplates.Contains(template))
+                {
+                    _holder.JsonTemplates.Add(template);
+                }
+                else
+                {
+                    int pos = _holder.JsonTemplates.IndexOf(template);
+                    if (pos >= 0 && pos < _holder.JsonTemplates.Count)
+                    {
+                        _holder.JsonTemplates[pos] = template;
+                    }
+                }
+                SaveJsonTemplateHolder(_filePath);
+            }            
+        }
+
+        public void SaveJsonTemplateHolder(string filepath)
         {
             throw new NotImplementedException();
         }
 
         public JsonTemplate LoadJsonTemplate(string templateName)
         {
-            throw new NotImplementedException();
+            JsonTemplate result;
+            if (_holder == null)
+                throw new InvalidOperationException("JsonTemplateHolder is not loaded.");
+
+            result = _holder.JsonTemplates.Find(x => x.Name == templateName);
+
+            if (result == null)
+            {
+                throw new KeyNotFoundException("Template not found");
+            }
+
+            return result;
         }
     }
 
+    [JsonObject(MemberSerialization = MemberSerialization.OptIn)]
     public class JsonTemplateHolder
     {
-        public AppleWWDRCACertificateInfo AppleWWDRCACertificate { get; set; }
+        [JsonProperty(DefaultValueHandling = DefaultValueHandling.Include 
+            ,PropertyName = "appleWWDRCACertificate"
+            ,Required = Required.Always
+            ,Order = 1)]
+        public AppleWwdrcaCertificateInfo AppleWwdrcaCertificate { get; set; }
+        
+
         public List<JsonTemplate> JsonTemplates { get; set; }
     }
 
-    public class AppleWWDRCACertificateInfo
+    public class AppleWwdrcaCertificateInfo
     {
-        public string AppleWWDRCACertificatePath { get; set; }
-        public string AppleWWDRCACertificateThumbprint { get; set; }
-        public StoreLocation AppleWWDRCACertificateStoreLocation { get; set; }
+        public string AppleWwdrcaCertificatePath { get; set; }
+        public string AppleWwdrcaCertificateThumbprint { get; set; }
+        public StoreLocation AppleWwdrcaCertificateStoreLocation { get; set; }
     }
 
     public class CertificateInfo
@@ -51,6 +115,8 @@ namespace Passbook.Generator
         public StoreLocation CertificateStoreLocation { get; set; }
     }
 
+    [JsonArray(AllowNullItems = false
+            , Id = "templates")]
     public class JsonTemplate
     {
         public string Name { get; set; }
@@ -62,7 +128,7 @@ namespace Passbook.Generator
         public string Description { get; set; }
         public string OrganizationName { get; set; }       
 
-        public string AppLaunchURL { get; set; }
+        public string AppLaunchUrl { get; set; }
         public List<int> AssociatedStoreIdentifiers { get; set; }
 
         public List<RelevantBeacon> Beacons { get; set; }
@@ -77,9 +143,9 @@ namespace Passbook.Generator
         public bool? SuppressStripShine { get; set; }
 
         public string AuthenticationToken { get; set; }
-        public string WebServiceURL { get; set; }
+        public string WebServiceUrl { get; set; }
 
-
+        public List<NfcPayload> NfcPayloads { get; set; }
 
         public List<Field> HeaderFields { get; set; }
         public List<Field> PrimaryFields { get; set; }
@@ -91,5 +157,34 @@ namespace Passbook.Generator
 
         public Dictionary<PassbookImage, string> Images { get; set; }
         public Dictionary<string, Dictionary<string, string>> Localizations { get; set; }
+
+        public override bool Equals(object obj)
+        {
+            if (obj == null)
+                return false;
+
+            if (ReferenceEquals(this, obj))
+                return true;
+
+            JsonTemplate other = obj as JsonTemplate;
+            if(other == null)
+            {
+                return false;
+            }
+            else
+            {
+                return this.Name.Equals(other.Name,StringComparison.InvariantCulture);
+            }
+        }
+
+        public override int GetHashCode()
+        {
+            return this.Name.GetHashCode();
+        }
+
+        public override string ToString()
+        {
+            return this.Name;
+        }
     }    
 }
