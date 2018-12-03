@@ -105,7 +105,7 @@ namespace Passbook.Generator
 			this.SecondaryFields = new List<Field>();
 			this.AuxiliaryFields = new List<Field>();
 			this.BackFields = new List<Field>();
-            this.Barcodes = new List<BarCode>();
+            this.Barcodes = new List<Barcode>();
 			this.Images = new Dictionary<PassbookImage, byte[]>();
 			this.RelevantLocations = new List<RelevantLocation>();
 			this.RelevantBeacons = new List<RelevantBeacon>();
@@ -316,12 +316,12 @@ namespace Passbook.Generator
 		/// <summary>
 		/// Optional. Information specific to barcodes. (iOS 8 and earlier)
 		/// </summary>
-		public BarCode Barcode { get; private set; }
+		public Barcode Barcode { get; private set; }
 
         /// <summary>
         /// Optional. Information specific to barcodes. (iOS 9 and later)
         /// </summary>
-        public List<BarCode> Barcodes { get; private set; }
+        public List<Barcode> Barcodes { get; private set; }
 
 		/// <summary>
 		/// Required. Pass type.
@@ -482,13 +482,7 @@ namespace Passbook.Generator
 		{
             if (type == BarcodeType.PKBarcodeFormatCode128)
                 throw new ArgumentException("Code128 is valid only in barcodes array");
-			Barcode = new BarCode()
-			{
-				Type = type,
-				Message = message,
-				Encoding = encoding,
-				AlternateText = altText
-			};
+			Barcode = new Barcode(type, message, encoding, altText);
             if (!Barcodes.Contains(Barcode))
                 Barcodes.Add(Barcode);
 		}
@@ -497,38 +491,20 @@ namespace Passbook.Generator
 		{
             if (type == BarcodeType.PKBarcodeFormatCode128)
                 throw new ArgumentException("Code128 is valid only in barcodes array");
-            Barcode = new BarCode() 
-			{
-				Type = type,
-				Message = message,
-				Encoding = encoding,
-				AlternateText = null
-			};
+            Barcode = new Barcode(type, message, encoding);
             if (!Barcodes.Contains(Barcode))
                 Barcodes.Add(Barcode);
         }
 
         public void AddBarcodeToArray(string message, BarcodeType type, string encoding, string altText)
         {
-            BarCode code = new BarCode()
-            {
-                Type = type,
-                Message = message,
-                Encoding = encoding,
-                AlternateText = altText
-            };
+            Barcode code = new Barcode(type, message, encoding, altText);
             this.Barcodes.Add(code);
         }
 
         public void AddBarcodeToArray(string message, BarcodeType type, string encoding)
         {
-            BarCode code = new BarCode()
-            {
-                Type = type,
-                Message = message,
-                Encoding = encoding,
-                AlternateText = null
-            };
+            Barcode code = new Barcode(type, message, encoding);
             this.Barcodes.Add(code);
         }
 

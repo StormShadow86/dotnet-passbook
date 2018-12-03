@@ -36,7 +36,7 @@ namespace Passbook.Sample.Web
             parameters.AddField("boarding-gate", FieldAttribute.Value, "F12");
             parameters.AddField("passenger-name", FieldAttribute.Value, "John Appleseed");
 
-            request.AddBarcode(BarcodeType.PKBarcodeFormatPDF417, "M1APPLESEED/JMR EZQ7O92 GVALHRBA 00723319C002F00009100", "iso-8859-1");
+            request.AddBarCode("M1APPLESEED/JMR EZQ7O92 GVALHRBA 00723319C002F00009100", BarcodeType.PKBarcodeFormatPDF417, "iso-8859-1");
 
             request.LoadTemplate("BoardingPass", parameters);
 

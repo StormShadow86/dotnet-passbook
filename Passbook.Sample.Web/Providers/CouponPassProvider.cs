@@ -26,7 +26,7 @@ namespace Passbook.Sample.Web
 
             TemplateModel parameters = new TemplateModel();
 
-            request.AddBarcode(BarcodeType.PKBarcodeFormatPDF417, "01927847623423234234", "UTF-8", "01927847623423234234");
+            request.AddBarCode("01927847623423234234", BarcodeType.PKBarcodeFormatPDF417, "UTF-8", "01927847623423234234");
 
             request.LoadTemplate("Coupon", parameters);
 
