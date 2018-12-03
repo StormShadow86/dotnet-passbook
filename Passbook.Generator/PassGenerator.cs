@@ -22,6 +22,7 @@ namespace Passbook.Generator
         private byte[] signatureFile = null;
         private byte[] manifestFile = null;
 		private Dictionary<string, byte[]> localizationFiles = null;
+        private Dictionary<string, Dictionary<string, byte[]>> localizationImages = null;
         private byte[] pkPassFile = null;
 
         private const string APPLE_CERTIFICATE_THUMBPRINT = "FF6797793A3CD798DC5B2ABEF56F73EDC9F83A64";
@@ -75,6 +76,20 @@ namespace Passbook.Generator
 						}
 					}
 
+                    foreach (KeyValuePair<string, Dictionary<string, byte[]>> localization in localizationImages)
+                    {
+                        foreach (KeyValuePair<string, byte[]> localizedImage in localization.Value)
+                        {
+                            ZipArchiveEntry localizedImageEntry = archive.CreateEntry(string.Format("{0}.lproj/{1}", localization.Key.ToLowerInvariant(), localizedImage.Key.ToLowerInvariant()));
+
+                            using (BinaryWriter writer = new BinaryWriter(localizedImageEntry.Open()))
+                            {
+                                writer.Write(localizedImage.Value);
+                                writer.Flush();
+                            }
+                        }
+                    }
+
                     ZipArchiveEntry PassJSONEntry = archive.CreateEntry(@"pass.json");
                     using (BinaryWriter writer = new BinaryWriter(PassJSONEntry.Open()))
                     {
@@ -107,6 +122,7 @@ namespace Passbook.Generator
             ValidateCertificates(request);
             CreatePassFile(request);
 			GenerateLocalizationFiles(request);
+            GenerateLocalizationImages(request);
             GenerateManifestFile(request);
         }
 
@@ -197,6 +213,16 @@ namespace Passbook.Generator
 			}
 		}
 
+        private void GenerateLocalizationImages(PassGeneratorRequest request)
+        {
+            localizationImages = new Dictionary<string, Dictionary<string, byte[]>>(StringComparer.OrdinalIgnoreCase);
+
+            foreach (KeyValuePair<string, Dictionary<string, byte[]>> localization in request.ImageLocalizations)
+            {
+                localizationImages.Add(localization.Key, localization.Value);
+            }
+        }
+
         private void GenerateManifestFile(PassGeneratorRequest request)
         {
             using (MemoryStream ms = new MemoryStream())
@@ -225,6 +251,16 @@ namespace Passbook.Generator
 							jsonWriter.WritePropertyName(string.Format("{0}.lproj/pass.strings", localization.Key.ToLowerInvariant()));
 							jsonWriter.WriteValue(hash);
 						}
+
+                        foreach (KeyValuePair<string, Dictionary<string, byte[]>> localization in localizationImages)
+                        {
+                            foreach (KeyValuePair<string, byte[]> localizedImage in localization.Value)
+                            {
+                                hash = GetHashForBytes(localizedImage.Value);
+                                jsonWriter.WritePropertyName(string.Format("{0}.lproj/{1}", localization.Key.ToLowerInvariant(), localizedImage.Key.ToLowerInvariant()));
+                                jsonWriter.WriteValue(hash);
+                            }
+                        }
 
                         jsonWriter.WriteEndObject();
                     }

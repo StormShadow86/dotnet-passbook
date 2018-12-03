@@ -111,6 +111,7 @@ namespace Passbook.Generator
 			this.RelevantBeacons = new List<RelevantBeacon>();
 			this.AssociatedStoreIdentifiers = new List<int>();
 			this.Localizations = new Dictionary<string, Dictionary<string, string>>(StringComparer.OrdinalIgnoreCase);
+            this.ImageLocalizations = new Dictionary<string, Dictionary<string, byte[]>>(StringComparer.OrdinalIgnoreCase);
             this.NfcPayloads = new List<NfcPayload>();
 			this.UserInfo = null;
 		}
@@ -443,7 +444,8 @@ namespace Passbook.Generator
 		#endregion
 
 		#region Localization
-		public Dictionary<string, Dictionary<string, string>> Localizations { get; set; }
+		public Dictionary<string, Dictionary<string, string>> Localizations { get; set; } //Used for string localization
+        public Dictionary<string, Dictionary<string, byte[]>> ImageLocalizations { get; set; } //Used for image localization
         #endregion
 
         #region NFC "Apple Pay"
@@ -545,6 +547,19 @@ namespace Passbook.Generator
 
 			values[key] = value;
 		}
+
+        public void AddImageLocalization(string languageCode, string key, byte[] value)
+        {
+            Dictionary<string, byte[]> values;
+
+            if (!ImageLocalizations.TryGetValue(languageCode, out values))
+            {
+                values = new Dictionary<string, byte[]>(StringComparer.OrdinalIgnoreCase);
+                ImageLocalizations.Add(languageCode, values);
+            }
+
+            values[key] = value;
+        }
 
         public void AddNfcPayload(string message, string encryptionPublicKey)
         {

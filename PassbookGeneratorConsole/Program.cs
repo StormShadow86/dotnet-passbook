@@ -145,7 +145,7 @@ namespace PassbookGeneratorConsole
         /// </summary>
         /// <returns></returns>
         /// <remarks>
-        /// SubjectKeyIdentifier DESKTOP-STORM: 901b19ecfe0082d4188f6f0398ec763ad8dacd49
+        /// SubjectKeyIdentifier DESKTOP-STORM: 96ccb973821ef44772ae65b3d022710729a97fea
         /// </remarks>
         private static X509Certificate2 GetPassCertificate()
         {
@@ -159,7 +159,7 @@ namespace PassbookGeneratorConsole
                 personalStore.Open(OpenFlags.ReadOnly);
 
                 coll = personalStore.Certificates.Find(X509FindType.FindBySubjectKeyIdentifier,
-                        "505416ee87479bfc25b22e0f7e9aa633753e51b5", false);
+                        "96ccb973821ef44772ae65b3d022710729a97fea", false);
                 if (coll.Count > 0)
                     passCert =coll[0];
 
@@ -194,34 +194,32 @@ namespace PassbookGeneratorConsole
                 request.TeamIdentifier = "SQY9S578XQ";
                 request.SerialNumber = System.Guid.NewGuid().ToString();
 
-                request.Description = "DatorSiS Pass";
+                request.Description = "Mega Parc";
                 request.OrganizationName = "Dator Inc.";
-                request.LogoText = "DatorSiS Pass";
+                request.LogoText = "Mega Parc";
 
                 request.BackgroundColor = "rgb(255,255,255)";
                 request.ForegroundColor = "rgb(0,0,0)";
 
-                request.Style = PassStyle.EventTicket;
+                request.Style = PassStyle.StoreCard;
 
-                request.AddPrimaryField(new StandardField("eventName", "event-Name", "Au Sommet Place Ville-Marie Observatoire"));
-                request.AddPrimaryField(new StandardField("customerName", "customer-Name", "Sven Conard"));
+                request.AddPrimaryField(new StandardField("eventName", "eventName", "Carte Manège"));
+                request.AddSecondaryField(new StandardField("customerName", "customerName", "Sven Conard"));
 
-                request.AddSecondaryField(new DateField("eventDate", "event-Date", FieldDateTimeStyle.PKDateStyleShort, FieldDateTimeStyle.PKDateStyleNone, DateTime.UtcNow.Date));
-                request.AddSecondaryField(new DateField("eventTime", "event-Time", FieldDateTimeStyle.PKDateStyleNone, FieldDateTimeStyle.PKDateStyleShort, DateTime.UtcNow));
+                request.AddBarCode("C11127", BarcodeType.PKBarcodeFormatPDF417, "iso-8859-1", "C11127"); //"Windows-1252", "BE411604");
 
-                request.AddBarCode("BE411604", BarcodeType.PKBarcodeFormatQR, "Windows-1252", "BE411604");
+                request.Images.Add(PassbookImage.Icon, File.ReadAllBytes(@"E:\Programmation\Git Repo\dotnet-passbook-sis\PassbookGeneratorConsole\icon.png"));
+                request.Images.Add(PassbookImage.IconRetina, File.ReadAllBytes(@"E:\Programmation\Git Repo\dotnet-passbook-sis\PassbookGeneratorConsole\icon@2x.png"));
+                request.Images.Add(PassbookImage.Logo, File.ReadAllBytes(@"E:\Programmation\Git Repo\dotnet-passbook-sis\PassbookGeneratorConsole\logo.png"));
+                request.Images.Add(PassbookImage.LogoRetina, File.ReadAllBytes(@"E:\Programmation\Git Repo\dotnet-passbook-sis\PassbookGeneratorConsole\icon@2x.png"));
 
-                request.Images.Add(PassbookImage.Icon, File.ReadAllBytes(@"E:\Programmation\dotnet-passbook-sis\PassbookGeneratorConsole\icon.png"));
-                request.Images.Add(PassbookImage.IconRetina, File.ReadAllBytes(@"E:\Programmation\dotnet-passbook-sis\PassbookGeneratorConsole\icon@2x.png"));                
+                request.AddLocalization("fr", "eventName", "Nom");
+                request.AddLocalization("fr", "customerName", "Client");
+                request.AddLocalization("en", "eventName", "Name");
+                request.AddLocalization("en", "customerName", "Customer");
 
-                request.AddLocalization("fr", "event-Name", "Événement");
-                request.AddLocalization("fr", "customer-Name", "Nom du client");
-                request.AddLocalization("fr", "event-Date", "Date de l'évéenement");
-                request.AddLocalization("fr", "event-Time", "Heure de l'événement");
-                request.AddLocalization("en", "event-Name", "Event Name");
-                request.AddLocalization("en", "customer-Name", "Customer Name");
-                request.AddLocalization("en", "event-Date", "Event Date");
-                request.AddLocalization("en", "event-Time", "Event Time");
+                //request.AddImageLocalization("fr", "icon.png", File.ReadAllBytes(@"E:\Programmation\Git Repo\dotnet-passbook-sis\PassbookGeneratorConsole\ASPVM\icon.png"));
+                //request.AddImageLocalization("fr", "logo.png", File.ReadAllBytes(@"E:\Programmation\Git Repo\dotnet-passbook-sis\PassbookGeneratorConsole\ASPVM\logo.png"));
 
                 generatedPass = generator.Generate(request);
             }
@@ -239,19 +237,15 @@ namespace PassbookGeneratorConsole
 
         private static void SendPass(string passPath, bool addBcc = false)
         {
-            using (var emailSender = new SmtpClient("smtp.1and1.com", 587))
+            using (var emailSender = new SmtpClient("smtp.office365.com", 587))
             {
                 emailSender.DeliveryMethod = SmtpDeliveryMethod.Network;
                 emailSender.EnableSsl = true;
 
                 emailSender.Credentials = new NetworkCredential("webadmin@datorsis.com", "202stv2684");
 
-                using (var msg = new MailMessage("webadmin@datorsis.com", "stormshadow666@gmail.com", "Test Passbook", ""))
+                using (var msg = new MailMessage("webadmin@datorsis.com", "sconard@datorsis.com", "Test Passbook", ""))
                 {
-                    if (addBcc)
-                    {
-                        msg.Bcc.Add("stormshadow666@gmail.com");
-                    }
                     msg.Attachments.Add(new Attachment(passPath, "application/vnd.apple.pkpass"));
                     emailSender.Send(msg);
                 }
