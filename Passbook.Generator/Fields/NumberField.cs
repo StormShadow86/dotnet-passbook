@@ -38,7 +38,7 @@ namespace Passbook.Generator.Fields
                 writer.WriteValue(CurrencyCode);
             }
 
-            if (NumberStyle != FieldNumberStyle.Unspecified)
+            if (string.IsNullOrEmpty(CurrencyCode) && NumberStyle != FieldNumberStyle.Unspecified)
             {
                 writer.WritePropertyName("numberStyle");
                 writer.WriteValue(NumberStyle.ToString());

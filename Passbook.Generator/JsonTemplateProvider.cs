@@ -103,7 +103,11 @@ namespace Passbook.Generator
     {
         public string AppleWwdrcaCertificatePath { get; set; }
         public string AppleWwdrcaCertificateThumbprint { get; set; }
+        public string AppleWwdrcaCertificateSubjectKeyIdentifier { get; set; }
+        public string AppleWwdrcaCertificateSerialNumber { get; set; }
         public StoreLocation AppleWwdrcaCertificateStoreLocation { get; set; }
+        public StoreName AppleWwdrcaCertificateStoreName { get; set; }
+        public X509FindType AppleWwdrcaFindType { get; set; }
     }
 
     public class CertificateInfo
@@ -112,7 +116,10 @@ namespace Passbook.Generator
         public string CertificatePassword { get; set; }
         public string CertificateThumbprint { get; set; }
         public string CertificateSubjectKeyIdentifier { get; set; }
+        public string CertificateSerialNumber { get; set; }
         public StoreLocation CertificateStoreLocation { get; set; }
+        public StoreName CertificateStoreName { get; set; }
+        public X509FindType CertificateFindType { get; set; }
     }
 
     [JsonArray(AllowNullItems = false

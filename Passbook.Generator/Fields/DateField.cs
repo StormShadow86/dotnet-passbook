@@ -74,7 +74,12 @@ namespace Passbook.Generator.Fields
 
         protected override void WriteValue(Newtonsoft.Json.JsonWriter writer)
         {
-            writer.WriteValue(Value.ToString("yyyy-MM-ddTHH:mmZ"));
+            if (Value.Kind == DateTimeKind.Unspecified)
+            {
+                DateTime localDate = new DateTime(Value.Ticks, DateTimeKind.Local);
+                Value = localDate;
+            }
+            writer.WriteValue(Value.ToString("yyyy-MM-ddTHH:mmK"));
         }
 
         public override void SetValue(object value)

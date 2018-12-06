@@ -651,6 +651,11 @@ namespace Passbook.Generator
 			if (RelevantDate.HasValue)
 			{
 				writer.WritePropertyName("relevantDate");
+                if (RelevantDate.Value.Kind == DateTimeKind.Unspecified)
+                {
+                    DateTime localDate = new DateTime(RelevantDate.Value.Ticks, DateTimeKind.Local);
+                    RelevantDate = localDate;
+                }
 				writer.WriteValue(RelevantDate.Value.ToString("yyyy-MM-ddTHH:mm:ssK"));
 			}
 

@@ -196,28 +196,57 @@ namespace PassbookGeneratorConsole
 
                 request.Description = "Mega Parc";
                 request.OrganizationName = "Dator Inc.";
-                request.LogoText = "Mega Parc";
+                //request.LogoText = "Mega Parc";
 
                 request.BackgroundColor = "rgb(255,255,255)";
                 request.ForegroundColor = "rgb(0,0,0)";
 
-                request.Style = PassStyle.StoreCard;
+                //request.Style = PassStyle.StoreCard;
+                request.Style = PassStyle.EventTicket;
 
-                request.AddPrimaryField(new StandardField("eventName", "eventName", "Carte Manège"));
-                request.AddSecondaryField(new StandardField("customerName", "customerName", "Sven Conard"));
+                var eventField = new StandardField("event", "", "eventName");
+                //var cardField = new StandardField("card", "", "cardName");
+                var customerField = new StandardField("customer", "customerNameLabel", "Sven Conard");
+                var expirationDateField = new DateField("expirationDate", "expirationDateLabel", FieldDateTimeStyle.PKDateStyleLong, FieldDateTimeStyle.PKDateStyleNone, new DateTime(2018,12,25,12,0,0));
+                var balanceField = new NumberField("balance", "balanceLabel", 43.75m, FieldNumberStyle.PKNumberStyleDecimal);
+                balanceField.CurrencyCode = "CAD";
+                //var balanceIntField = new NumberField("balanceInt", "balanceIntLabel", 45, FieldNumberStyle.PKNumberStyleDecimal);
 
-                request.AddBarCode("C11127", BarcodeType.PKBarcodeFormatPDF417, "iso-8859-1", "C11127"); //"Windows-1252", "BE411604");
+                request.AddHeaderField(expirationDateField);
+                //request.AddHeaderField(balanceField);
+                //request.AddHeaderField(balanceIntField);
+                request.AddPrimaryField(eventField);
+                //request.AddPrimaryField(cardField);
+                request.AddSecondaryField(customerField);
+                //request.AddAuxiliaryField(expirationDateField);
+                request.AddAuxiliaryField(balanceField);
+
+                request.AddLocation(46.040017, -73.447538, "Bienvenue chez Dator!");
+                //request.RelevantDate = new DateTime(2018,12,6,18,0,0,DateTimeKind.Local);
+                request.RelevantDate = new DateTime(2018,12,6,18,15,0);
+
+                //request.AddBarCode("C11127", BarcodeType.PKBarcodeFormatPDF417, "iso-8859-1", "C11127"); //"Windows-1252", "BE411604");
+                request.AddBarCode("BE687136", BarcodeType.PKBarcodeFormatPDF417, "iso-8859-1", "BE687136");
 
                 request.Images.Add(PassbookImage.Icon, File.ReadAllBytes(@"E:\Programmation\Git Repo\dotnet-passbook-sis\PassbookGeneratorConsole\icon.png"));
                 request.Images.Add(PassbookImage.IconRetina, File.ReadAllBytes(@"E:\Programmation\Git Repo\dotnet-passbook-sis\PassbookGeneratorConsole\icon@2x.png"));
                 request.Images.Add(PassbookImage.Logo, File.ReadAllBytes(@"E:\Programmation\Git Repo\dotnet-passbook-sis\PassbookGeneratorConsole\logo.png"));
                 request.Images.Add(PassbookImage.LogoRetina, File.ReadAllBytes(@"E:\Programmation\Git Repo\dotnet-passbook-sis\PassbookGeneratorConsole\icon@2x.png"));
 
-                request.AddLocalization("fr", "eventName", "Nom");
-                request.AddLocalization("fr", "customerName", "Client");
-                request.AddLocalization("en", "eventName", "Name");
-                request.AddLocalization("en", "customerName", "Customer");
 
+                request.AddLocalization("fr","eventName", "Carte Manèges");
+                //request.AddLocalization("fr", "cardName", "Carte Manèges");
+                request.AddLocalization("fr", "customerNameLabel", "Client");
+                request.AddLocalization("fr", "expirationDateLabel", "Expire le");
+                //request.AddLocalization("fr", "balanceIntLabel", "Solde");
+                request.AddLocalization("fr", "balanceLabel", "Solde");
+                request.AddLocalization("en","eventName", "Rides Card");
+                //request.AddLocalization("en", "cardName", "Rides Card");
+                request.AddLocalization("en", "customerNameLabel", "Customer");
+                request.AddLocalization("en", "expirationDateLabel", "Expires on");
+                //request.AddLocalization("en", "balanceIntLabel", "Balance");
+                request.AddLocalization("en", "balanceLabel", "Balance");
+                
                 //request.AddImageLocalization("fr", "icon.png", File.ReadAllBytes(@"E:\Programmation\Git Repo\dotnet-passbook-sis\PassbookGeneratorConsole\ASPVM\icon.png"));
                 //request.AddImageLocalization("fr", "logo.png", File.ReadAllBytes(@"E:\Programmation\Git Repo\dotnet-passbook-sis\PassbookGeneratorConsole\ASPVM\logo.png"));
 

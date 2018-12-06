@@ -1,9 +1,13 @@
 {
-	"appleWWDRCACertificateInfo":
+	"appleWWDRCACertificate":
 	{
 		"appleWWDRCACertificatePath":"~/App_Data/AppleWWDRCA.cer",
 		"appleWWDRCACertificateThumbprint":"ff6797793a3cd798dc5b2abef56f73edc9f83a64",
-		"appleWWDRCACertificateStoreLocation":"CertificateAuthority"
+		"appleWWDRCACertificateSubjectKeyIdentifier":null,
+		"appleWWDRCACertificateSerialNumber":null,
+		"appleWWDRCACertificateStoreLocation":"LocalMachine",
+		"appleWWDRCACertificateStoreName":"CertificateAuthority",
+		"appleWWDRCACertificateFindType":"FindByThumbprint"
 	},
 	"templates":[
 		{
@@ -17,7 +21,11 @@
 				"certificatePassword":"1234",
 				"certificateThumbprint":"5ccf3a8aa2adb19dfe2cd659ea35f898a9806845",
 				"certificateSubjectKeyIdentifier":"901b19ecfe0082d4188f6f0398ec763ad8dacd49",
-				"certificateStoreLocation":"Personnal"
+				"certificateSerialNumber":null,
+				"certificateStoreLocation":"CurrentUser",
+				"certificateStoreName":"My",
+				"certificateFindType":"FindByThumbprint"
+				
 			},
 			"description":"My First Event Pass",
 			"organizationName":"Dator Inc.",
